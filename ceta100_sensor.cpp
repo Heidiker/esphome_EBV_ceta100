@@ -12,9 +12,6 @@ void Ceta100Sensor::setup() {
 
 void Ceta100Sensor::update() {
   if (available() >= 43) {
-//    std::vector<uint8_t> data;
-//    for (int i = 0; i < 43; i++) {
-//      data.push_back(read());
       uint8_t data[43];
       for (int i = 0; i < 43; i++) {
       data[i] = read();
@@ -53,9 +50,9 @@ void Ceta100Sensor::dump_config() {
 }  // namespace ceta100_sensor
 }  // namespace esphome
 
-          //publish_state(bytes[1]);
-          //00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39:40:41:42
-          //21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:80:00:5C:01:6D:13:6A:07:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:A8:E6
+//publish_state(bytes[1]);
+//00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39:40:41:42
+//21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:80:00:5C:01:6D:13:6A:07:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:A8:E6
 
 //#0...#2: unknown, most likely start marker, seem to be always 210a0a ?
 //#3...#4: unknown, most likely message type, seem to be always 8417 ?
