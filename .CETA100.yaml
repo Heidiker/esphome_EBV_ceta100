@@ -1,0 +1,134 @@
+
+external_components:
+#  - source: my_components
+  - source: github://eigger/espcomponents@latest
+    components: [ uartex ]
+    refresh: always
+
+#CETA100 control
+uart:
+  - id: uart_bus
+    tx_pin: 17 #3
+    rx_pin: 16 #1
+    baud_rate: 9600 #port = serial.Serial(serialDevice, baudrate=9600, timeout=60.0, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE, xonxoff=False, rtscts=False, dsrdtr=False)
+    stop_bits: 1
+#    debug:
+#      direction: BOTH
+
+# https://github.com/eigger/espcomponents/tree/master/components/uartex
+uartex:
+  uart_id: uart_bus
+  rx_header: [0x21, 0x0A, 0x15] 
+  rx_length: 43
+  error:
+    disabled: true
+  log:
+   disabled: true
+  rx_checksum2:  !lambda |-
+    std::vector<uint8_t> full_data = {0x21, 0x0A, 0x15};
+    full_data.insert(full_data.end(), data, data + len);
+    auto crc = esphome::uartex::crc16_reflected_checksum(0x0000, 0x8408, full_data.data(), full_data.size());
+    // Swap the order to match your original output: [low, high]
+    return std::vector<uint8_t>{crc[1], crc[0]};
+
+#Data Bytes   :   00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39:40:41:42
+#offset UARTEX:   00:00:00:00:01:02:03:04:05:06:07:08:09:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:32:33:34:35:36:37:38:39
+#example snippet: 21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:80:00:5C:01:6D:13:6A:07:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:A8:E6
+#example snippet: 21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:10:02:AB:02:6B:1E:38:17:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:12:61
+#example snippet: 21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:08:02:AB:02:6B:1E:38:17:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:A5:EF
+#example snippet: 21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:08:02:AA:02:6B:1E:38:17:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:DE:EB
+#example snippet: 21:0A:15:8E:17:00:22:00:00:1F:00:00:01:00:E3:01:AA:02:6B:1E:38:17:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:D3:8C
+
+#0...#2: unknown, most likely start marker, seem to be always 21:0A:15
+#3...#4: unknown, most likely message type, seem to be always 8E:17 ?
+#5...#6: unknown, message length seem to be always 00:22 (=dec 34 = 43 bytes total - 7 bytes header - 2 bytes checksum)
+#7:      unknown, always 00 - Evtl. Wäremleistung in W falls Option X1
+#8:      unknown, always 00 - Evtl. Wäremleistung in W falls Option X1
+#9:      unknown, always 1F - Evtl. Wäremleistung in W falls Option X1
+#10:     unknown, always 00 - Evtl. kumulierte Wäremeenergie in kWh falls Option X1
+#11:     unknown, always 00 - Evtl. kumulierte Wäremeenergie in kWh falls Option X1
+#12:     unknown, always 01 - Evtl. kumulierte Wäremeenergie in kWh falls Option X1
+#13:     Pumpen-mode (0=off, 1=on) 
+#(#14+#15*256)/10 (long int): Temperatur Wärmelieferant / signed / precision: 1 / endian: little
+#(#16+#17*256)/10 (long int): Temperatur Wärmespeicher / signed / precision: 1 / endian: little
+#(#18+#19*256)/10 (long int): Betriebsstunden Pumpe / endian: little
+#(#20+#21*256)/10 (long int): Anzahl Pumpenstarts / endian: little
+#22..#40 - always 0x00
+# 41 + 42 CRC-16 Kermit, little endian codiert (low byte first)
+
+binary_sensor:
+  - platform: uartex
+    device_id: $ceta_id
+    device_class: running
+    update_interval: $update_interval
+    id: pump_mode
+    name: "CETA100 Pumpen Mode" 
+    state_on:
+      offset: 10
+      data: [0x02]
+      mask: [0x02]
+    state_off:
+      offset: 10
+      data: [0x00]
+      mask: [0x02] 
+           
+sensor:
+  - platform: uartex
+    name: "CETA100 Solar Modul Temperature"
+    device_class: temperature
+    state_class: measurement
+    device_id: $ceta_id
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    accuracy_decimals: 1
+    state_number:
+      offset: 11
+      length: 2
+      signed: true
+      precision: 1
+      endian: little
+    update_interval: $update_interval
+
+  - platform: uartex
+    name: "CETA100 Speicher Temperature"
+    device_class: temperature
+    state_class: measurement
+    device_id: $ceta_id
+    unit_of_measurement: "°C"
+    icon: "mdi:thermometer"
+    accuracy_decimals: 1
+    state_number:
+      offset: 13
+      length: 2
+      signed: true
+      precision: 1
+      endian: little
+    update_interval: $update_interval
+
+  - platform: uartex
+    name: "CETA100 Anzahl Starts Pumpe"
+    update_interval: $update_interval
+    state_class: TOTAL_INCREASING
+    device_id: $ceta_id
+    icon: "mdi:counter"
+    accuracy_decimals: 0
+    state_number:
+      offset: 17
+      length: 2
+      signed: false
+      precision: 0
+      endian: little
+
+
+  - platform: uartex
+    name: "CETA100 Betriebsstunden Pumpe"
+    update_interval: $update_interval
+    device_id: $ceta_id
+    device_class: duration
+    icon: "mdi:timer-outline"
+    state_number:
+      offset: 15
+      length: 2
+      signed: false
+      precision: 0
+      endian: little
