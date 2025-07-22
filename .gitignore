@@ -1,2 +1,16 @@
-/.esphome/
-/.__pycache__/
+# Ingoriere alles
+*
+
+#Erlaube folgende Dateien
+!*.yaml
+!*.cpp
+!*.h
+!*.py
+!*.svg
+!*.png
+!*.gitignore
+!*.gitmodules
+
+# Erlaube Verzeichnisse (damit Git in Unterordner schauen kann)
+!*/
+
