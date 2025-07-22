@@ -1,4 +1,3 @@
-
 external_components:
 #  - source: my_components
   - source: github://eigger/espcomponents@latest
