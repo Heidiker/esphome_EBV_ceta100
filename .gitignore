@@ -11,6 +11,5 @@
 !*.gitignore
 !*.gitmodules
 
-# Erlaube Verzeichnisse (damit Git in Unterordner schauen kann)
-!*/
+
 
