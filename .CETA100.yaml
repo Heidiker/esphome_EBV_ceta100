@@ -86,7 +86,9 @@ sensor:
       signed: true
       precision: 1
       endian: little
-    update_interval: $update_interval
+    update_interval: $update_interval  ## funktioniert nicht - deher filter
+    filters:
+      - throttle: $update_interval    
 
   - platform: uartex
     name: "CETA100 Speicher Temperature"
@@ -102,7 +104,9 @@ sensor:
       signed: true
       precision: 1
       endian: little
-    update_interval: $update_interval
+    update_interval: $update_interval  ## funktioniert nicht - deher filter
+    filters:
+      - throttle: $update_interval
 
   - platform: uartex
     name: "CETA100 Anzahl Starts Pumpe"
