@@ -61,7 +61,7 @@ binary_sensor:
     device_class: running
     update_interval: $update_interval
     id: pump_mode
-    name: "CETA100 Pumpen Mode" 
+    name: "Pumpen Mode" 
     state_on:
       offset: 10
       data: [0x02]
@@ -73,7 +73,7 @@ binary_sensor:
            
 sensor:
   - platform: uartex
-    name: "CETA100 Solar Modul Temperature"
+    name: "Solar Modul Temperature"
     device_class: temperature
     state_class: measurement
     device_id: $ceta_id
@@ -91,7 +91,7 @@ sensor:
       - throttle: $update_interval    
 
   - platform: uartex
-    name: "CETA100 Speicher Temperature"
+    name: "Speicher Temperature"
     device_class: temperature
     state_class: measurement
     device_id: $ceta_id
@@ -109,7 +109,7 @@ sensor:
       - throttle: $update_interval
 
   - platform: uartex
-    name: "CETA100 Anzahl Starts Pumpe"
+    name: "Anzahl Starts Pumpe"
     update_interval: $update_interval
     state_class: TOTAL_INCREASING
     device_id: $ceta_id
@@ -124,7 +124,7 @@ sensor:
 
 
   - platform: uartex
-    name: "CETA100 Betriebsstunden Pumpe"
+    name: "Betriebsstunden Pumpe"
     update_interval: $update_interval
     device_id: $ceta_id
     device_class: duration
